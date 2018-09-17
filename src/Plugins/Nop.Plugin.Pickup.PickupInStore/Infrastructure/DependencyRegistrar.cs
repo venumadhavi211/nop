@@ -27,8 +27,35 @@ namespace Nop.Plugin.Pickup.PickupInStore.Infrastructure
         {
             builder.RegisterType<StorePickupPointService>().As<IStorePickupPointService>().InstancePerLifetimeScope();
 
-            //data context
+            ////data context
             builder.RegisterPluginDataContext<StorePickupPointObjectContext>("nop_object_context_pickup_in_store-pickup");
+
+            ////override required repository with our custom context
+            //builder.RegisterType<EfRepository<StorePickupPoint>>().As<IRepository<StorePickupPoint>>()
+            //    .WithParameter(ResolvedParameter.ForNamed<IDbContext>("nop_object_context_pickup_in_store-pickup"))
+            //    .InstancePerLifetimeScope();
+        }
+
+        /// <summary>
+        /// Order of this dependency registrar implementation
+        /// </summary>
+        public int Order => 1;
+    }
+
+    public class PluginDependencyRegistrar : IPluginDependencyRegistrar
+    {
+        /// <summary>
+        /// Register services and interfaces
+        /// </summary>
+        /// <param name="builder">Container builder</param>
+        /// <param name="typeFinder">Type finder</param>
+        /// <param name="config">Config</param>
+        public virtual void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
+        {
+            //builder.RegisterType<StorePickupPointService>().As<IStorePickupPointService>().InstancePerLifetimeScope();
+
+            //data context
+            //builder.RegisterPluginDataContext<StorePickupPointObjectContext>("nop_object_context_pickup_in_store-pickup");
 
             //override required repository with our custom context
             builder.RegisterType<EfRepository<StorePickupPoint>>().As<IRepository<StorePickupPoint>>()

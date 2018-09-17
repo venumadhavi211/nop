@@ -333,5 +333,6 @@ namespace Nop.Web.Framework.Infrastructure.Extensions
                     EngineContext.Current.Resolve<IPermissionService>().Authorize(StandardPermissionProvider.AccessAdminPanel);
             }).AddEntityFramework();
         }
+
     }
 }

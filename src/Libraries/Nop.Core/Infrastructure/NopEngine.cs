@@ -30,6 +30,8 @@ namespace Nop.Core.Infrastructure
         /// </summary>
         private IServiceProvider _serviceProvider { get; set; }
 
+        public IServiceCollection serviceCollection { get; set; }
+
         #endregion
 
         #region Utilities
@@ -95,11 +97,22 @@ namespace Nop.Core.Infrastructure
             foreach (var dependencyRegistrar in instances)
                 dependencyRegistrar.Register(containerBuilder, typeFinder, nopConfig);
 
+            var pluginDependencyRegistrars = typeFinder.FindClassesOfType<IPluginDependencyRegistrar>();
+            var instances2 = pluginDependencyRegistrars
+                .Where(dependencyRegistrar => PluginManager.FindPlugin(dependencyRegistrar)?.Installed ?? false) //ignore not installed plugins
+                .Select(dependencyRegistrar => (IPluginDependencyRegistrar)Activator.CreateInstance(dependencyRegistrar))
+                .OrderBy(dependencyRegistrar => dependencyRegistrar.Order);
+
+            foreach (var dependencyRegistrar in instances2)
+                dependencyRegistrar.Register(containerBuilder, typeFinder, nopConfig);
+
             //populate Autofac container builder with the set of registered service descriptors
             containerBuilder.Populate(services);
 
             //create service provider
             _serviceProvider = new AutofacServiceProvider(containerBuilder.Build());
+            var eng = EngineContext.Current.Resolve<IEngine>();
+            eng.serviceCollection = services;
             return _serviceProvider;
         }
 
@@ -302,4 +315,7 @@ namespace Nop.Core.Infrastructure
 
         #endregion
     }
+
+
+    
 }

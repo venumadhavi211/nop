@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Nop.Core;
 using Nop.Core.Domain.Cms;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Payments;
 using Nop.Core.Domain.Shipping;
 using Nop.Core.Domain.Tax;
+using Nop.Core.Infrastructure;
 using Nop.Core.Plugins;
 using Nop.Services.Authentication.External;
 using Nop.Services.Cms;
@@ -46,6 +49,10 @@ namespace Nop.Web.Areas.Admin.Controllers
         private readonly IUploadService _uploadService;
         private readonly IWebHelper _webHelper;
         private readonly IWidgetService _widgetService;
+
+        private readonly IEngine _engine;
+        //Microsoft.Extensions.DependencyInjection.IServiceCollection _service;
+
         private readonly PaymentSettings _paymentSettings;
         private readonly ShippingSettings _shippingSettings;
         private readonly TaxSettings _taxSettings;
@@ -69,6 +76,10 @@ namespace Nop.Web.Areas.Admin.Controllers
             IUploadService uploadService,
             IWebHelper webHelper,
             IWidgetService widgetService,
+
+            IEngine engine,
+            //Microsoft.Extensions.DependencyInjection.IServiceCollection service,
+            
             PaymentSettings paymentSettings,
             ShippingSettings shippingSettings,
             TaxSettings taxSettings,
@@ -92,6 +103,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             this._shippingSettings = shippingSettings;
             this._taxSettings = taxSettings;
             this._widgetSettings = widgetSettings;
+
+            this._engine = engine;
+            //this._service = service;
         }
 
         #endregion
@@ -226,6 +240,31 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (pluginDescriptor.Installed)
                     return RedirectToAction("List");
 
+                //pluginDescriptor.PluginType;
+
+                var typeFinder = _engine.Resolve<ITypeFinder>();
+                var containerBuilder = new Autofac.ContainerBuilder();
+                var engine = _engine.Resolve<IEngine>();
+
+
+
+                var pluginDependencyRegistrars = typeFinder.FindClassesOfType<Core.Infrastructure.DependencyManagement.IPluginDependencyRegistrar>();
+
+                var instances2 = pluginDependencyRegistrars
+                    .Where(dependencyRegistrar => !PluginManager.FindPlugin(dependencyRegistrar)?.Installed ?? false) //ignore not installed plugins
+                    .Where(dependencyRegistrar => dependencyRegistrar.FullName.Contains(systemName)) //ignore not installed plugins
+                    .Select(dependencyRegistrar => (Core.Infrastructure.DependencyManagement.IPluginDependencyRegistrar)Activator.CreateInstance(dependencyRegistrar))
+                    .First();
+
+                instances2.Register(containerBuilder, null, null);
+                //var services = _engine.Resolve<IServiceCollection>();
+                //containerBuilder.Populate(services.GetServices());
+                var serviceCollection = engine.serviceCollection;
+                containerBuilder.Populate(serviceCollection);
+                containerBuilder.Build();
+
+                //var applicationContainer = containerBuilder.Build();
+                //var r = new AutofacServiceProvider(applicationContainer);
                 //install plugin
                 pluginDescriptor.Instance().Install();
 
