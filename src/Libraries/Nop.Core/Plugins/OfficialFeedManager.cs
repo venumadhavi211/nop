@@ -20,7 +20,8 @@ namespace Nop.Core.Plugins
 
         private static XmlDocument GetDocument(string feedQuery, params object[] args)
         {
-            var request = WebRequest.Create(MakeUrl(feedQuery, args));
+            var _webHelper = Infrastructure.EngineContext.Current.Resolve<IWebHelper>();
+            var request = _webHelper.CreateHttpWebRequest(MakeUrl(feedQuery, args));
             request.Timeout = 5000;
             using (var response = request.GetResponse())
             {

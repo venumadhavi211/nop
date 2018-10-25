@@ -149,6 +149,15 @@ set @resources='
   <LocaleResource Name="ShoppingCart.DiscountCouponCode.Invalid">
     <Value>This coupon code ({0}) is invalid or no longer available.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.System.Warnings.ProxyConfiguraiton.Failed">
+    <Value>Proxy configuration is failed</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.Warnings.ProxyConfiguraiton.NotEnabled">
+    <Value>Proxy is not enabled</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.Warnings.ProxyConfiguraiton.OK">
+    <Value>Proxy configuration is OK</Value>
+  </LocaleResource>
 </Language>
 '
 

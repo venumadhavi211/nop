@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
@@ -466,6 +467,91 @@ namespace Nop.Core
                 rawUrl = $"{request.PathBase}{request.Path}{request.QueryString}";
 
             return rawUrl;
+        }
+
+        /// <summary>
+        /// Get HTTP client
+        /// </summary>
+        public virtual HttpClient CreateHttpClient()
+        {
+                var nopconfig = EngineContext.Current.Resolve<NopConfig>();
+
+                if (!nopconfig.ProxyEnabled)
+                {
+                    return new HttpClient();
+                }
+
+                var proxyAddress = $"{nopconfig.ProxyAddress}:{nopconfig.ProxyPort}";
+
+                var webProxy = new WebProxy(proxyAddress)
+                {
+                    BypassProxyOnLocal = nopconfig.ProxyBypassProxyOnLocal,
+                };
+
+                if (string.IsNullOrEmpty(nopconfig.ProxyUserName) & string.IsNullOrEmpty(nopconfig.ProxyPassword))
+                {
+                    webProxy.UseDefaultCredentials = true;
+                    webProxy.Credentials = CredentialCache.DefaultCredentials;
+                }
+                else
+                {
+                    webProxy.UseDefaultCredentials = false;
+                    webProxy.Credentials = new NetworkCredential()
+                    {
+                        UserName = nopconfig.ProxyUserName,
+                        Password = nopconfig.ProxyPassword
+                    };
+                }
+
+                var handler = new HttpClientHandler()
+                {
+                    UseDefaultCredentials = webProxy.UseDefaultCredentials,
+                    Proxy = webProxy,
+                    PreAuthenticate = nopconfig.ProxyPreAuthenticate,
+                };
+
+                return new HttpClient(handler);
+        }
+
+        /// <summary>
+        /// Get HTTP web request
+        /// </summary>
+        public virtual HttpWebRequest CreateHttpWebRequest(string requestUri)
+        {
+            var nopconfig = EngineContext.Current.Resolve<NopConfig>();
+
+            HttpWebRequest res = (HttpWebRequest)WebRequest.Create(requestUri);
+
+            if (!nopconfig.ProxyEnabled)
+            {
+                return res;
+            }
+
+            var proxyAddress = $"{nopconfig.ProxyAddress}:{nopconfig.ProxyPort}";
+
+            var webProxy = new WebProxy(proxyAddress)
+            {
+                BypassProxyOnLocal = nopconfig.ProxyBypassProxyOnLocal,
+            };
+
+            if (string.IsNullOrEmpty(nopconfig.ProxyUserName) & string.IsNullOrEmpty(nopconfig.ProxyPassword))
+            {
+                webProxy.UseDefaultCredentials = true;
+                webProxy.Credentials = CredentialCache.DefaultCredentials;
+            }
+            else
+            {
+                webProxy.UseDefaultCredentials = false;
+                webProxy.Credentials = new NetworkCredential()
+                {
+                    UserName = nopconfig.ProxyUserName,
+                    Password = nopconfig.ProxyPassword
+                };
+            }
+
+            res.Proxy = webProxy;
+
+            return res;
         }
 
         #endregion

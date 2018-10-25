@@ -112,7 +112,7 @@ namespace Nop.Web.Areas.Admin.Factories
                     _webHelper.GetStoreLocation()).ToLowerInvariant();
 
                 //create request
-                var request = WebRequest.Create(nopCommerceNewsUrl);
+                var request = _webHelper.CreateHttpWebRequest(nopCommerceNewsUrl);
 
                 //specify request timeout
                 request.Timeout = 3000;
