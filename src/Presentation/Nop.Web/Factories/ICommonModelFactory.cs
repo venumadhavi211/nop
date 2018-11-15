@@ -1,4 +1,5 @@
 ﻿using Nop.Core.Domain.Vendors;
+using Nop.Web.Areas.Admin.Models.Settings;
 using Nop.Web.Models.Common;
 
 namespace Nop.Web.Factories
@@ -98,7 +99,7 @@ namespace Nop.Web.Factories
         /// Prepare the favicon model
         /// </summary>
         /// <returns>Favicon model</returns>
-        FaviconModel PrepareFaviconModel();
+        FaviconAndAppIconsModel PrepareFaviconAndAppIconsModel();
 
         /// <summary>
         /// Get robots.txt file

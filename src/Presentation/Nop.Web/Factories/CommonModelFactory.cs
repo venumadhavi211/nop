@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -23,6 +24,7 @@ using Nop.Core.Domain.Vendors;
 using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
+using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Forums;
@@ -33,6 +35,7 @@ using Nop.Services.Security;
 using Nop.Services.Seo;
 using Nop.Services.Themes;
 using Nop.Services.Topics;
+using Nop.Web.Areas.Admin.Models.Settings;
 using Nop.Web.Framework.Themes;
 using Nop.Web.Framework.UI;
 using Nop.Web.Infrastructure.Cache;
@@ -81,6 +84,7 @@ namespace Nop.Web.Factories
         private readonly IUrlRecordService _urlRecordService;
         private readonly IWebHelper _webHelper;
         private readonly IWorkContext _workContext;
+        private readonly ISettingService _settingService;
         private readonly LocalizationSettings _localizationSettings;
         private readonly NewsSettings _newsSettings;
         private readonly StoreInformationSettings _storeInformationSettings;
@@ -124,6 +128,7 @@ namespace Nop.Web.Factories
             IUrlRecordService urlRecordService,
             IWebHelper webHelper,
             IWorkContext workContext,
+            ISettingService settingService,
             LocalizationSettings localizationSettings,
             NewsSettings newsSettings,
             StoreInformationSettings storeInformationSettings,
@@ -163,6 +168,7 @@ namespace Nop.Web.Factories
             this._urlRecordService = urlRecordService;
             this._webHelper = webHelper;
             this._workContext = workContext;
+            this._settingService = settingService;
             this._localizationSettings = localizationSettings;
             this._newsSettings = newsSettings;
             this._storeInformationSettings = storeInformationSettings;
@@ -720,26 +726,16 @@ namespace Nop.Web.Factories
         /// Prepare the favicon model
         /// </summary>
         /// <returns>Favicon model</returns>
-        public virtual FaviconModel PrepareFaviconModel()
+        public virtual FaviconAndAppIconsModel PrepareFaviconAndAppIconsModel()
         {
-            var model = new FaviconModel();
+            var storeId = _storeContext.ActiveStoreScopeConfiguration;
+            var commonSettings = _settingService.LoadSetting<CommonSettings>(storeId);
 
-            //try loading a store specific favicon
-
-            var faviconFileName = $"favicon-{_storeContext.CurrentStore.Id}.ico";
-            var localFaviconPath = _fileProvider.Combine(_hostingEnvironment.WebRootPath, faviconFileName);
-            if (!_fileProvider.FileExists(localFaviconPath))
+            var model = new FaviconAndAppIconsModel()
             {
-                //try loading a generic favicon
-                faviconFileName = "favicon.ico";
-                localFaviconPath = _fileProvider.Combine(_hostingEnvironment.WebRootPath, faviconFileName);
-                if (!_fileProvider.FileExists(localFaviconPath))
-                {
-                    return model;
-                }
-            }
+                HeadCode = commonSettings.FaviconAndAppIconsHeadCode
+            };
 
-            model.FaviconUrl = _webHelper.GetStoreLocation() + faviconFileName;
             return model;
         }
 

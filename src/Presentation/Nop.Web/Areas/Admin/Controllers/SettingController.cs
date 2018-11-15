@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Xml;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Configuration;
@@ -30,6 +32,7 @@ using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Messages;
 using Nop.Services.Orders;
+using Nop.Services.Plugins;
 using Nop.Services.Security;
 using Nop.Services.Stores;
 using Nop.Web.Areas.Admin.Factories;
@@ -67,6 +70,8 @@ namespace Nop.Web.Areas.Admin.Controllers
         private readonly IStoreContext _storeContext;
         private readonly IStoreService _storeService;
         private readonly IWorkContext _workContext;
+        private readonly IWebHelper _webHelper;
+        private readonly IUploadService _uploadService;
         private readonly NopConfig _config;
 
         #endregion
@@ -92,6 +97,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             IStoreContext storeContext,
             IStoreService storeService,
             IWorkContext workContext,
+            IWebHelper webHelper,
+            IUploadService uploadService,
             NopConfig config)
         {
             this._addressService = addressService;
@@ -113,6 +120,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             this._storeContext = storeContext;
             this._storeService = storeService;
             this._workContext = workContext;
+            this._webHelper = webHelper;
+            this._uploadService = uploadService;
             this._config = config;
         }
 
@@ -1273,6 +1282,42 @@ namespace Nop.Web.Areas.Admin.Controllers
             //now clear settings cache
             _settingService.ClearCache();
 
+            //favicon and app icons head code
+            if (!string.IsNullOrEmpty(model.FaviconAndAppIconSettings.HeadCode) && model.FaviconAndAppIconSettings.HeadCode != commonSettings.FaviconAndAppIconsHeadCode)
+            {
+                try
+                {
+                    //wrap the incoming code in the parent element so that the multiple root element error does not occur when the string is transformed into xml
+                    var headCode = "<parent>" + model.FaviconAndAppIconSettings.HeadCode + "</parent>";
+
+                    var xml = new XmlDocument();
+                    xml.LoadXml(headCode);
+                    //find all elements with the href attribute
+                    var xnList = xml.SelectNodes("//*[@href]");
+                    foreach (XmlNode xn in xnList)
+                    {
+                        //add to the href attribute the folder in which the favicon and app icons for this store are located
+                        //When a browser loads a favicon for the first time, it tends to cache it and to never load it again. A workaround is to append a version to the favicon URLs as a query parameter.
+                        var newHrefValue = $"/icons_{_storeContext.CurrentStore.Id}" + xn.Attributes["href"].Value + $"?f={DateTime.Now.Minute}{DateTime.Now.Second}{DateTime.Now.Millisecond}";
+                        xn.Attributes["href"].Value = newHrefValue;
+                    }
+                    // take only the inner part of the added parent element
+                    commonSettings.FaviconAndAppIconsHeadCode = xml.DocumentElement.InnerXml; ;
+                }
+                catch (Exception)
+                {
+                    _notificationService.ErrorNotification(_localizationService.GetResource("Admin.Common.FaviconAndAppIcons.HeadCodeError"));
+                }
+            }
+
+            //we do not clear cache after each setting update.
+            //this behavior can increase performance because cached settings will not be cleared 
+            //and loaded from database after each update
+            _settingService.SaveSettingOverridablePerStore(commonSettings, x => x.FaviconAndAppIconsHeadCode, model.FaviconAndAppIconSettings.HeadCode_OverrideForStore, storeScope, false);
+
+            //now clear settings cache
+            _settingService.ClearCache();
+
             //security settings
             var securitySettings = _settingService.LoadSetting<SecuritySettings>(storeScope);
             if (securitySettings.AdminAreaAllowedIpAddresses == null)
@@ -1576,6 +1621,39 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             return RedirectToAction("GeneralCommon");
         }
+
+        [HttpPost]
+        public virtual IActionResult UploadIconsArchive(IFormFile archivefile)
+        {
+            if (!_permissionService.Authorize(StandardPermissionProvider.ManageSettings))
+                return AccessDeniedView();
+
+            try
+            {
+                if (archivefile == null || archivefile.Length == 0)
+                {
+                    _notificationService.ErrorNotification(_localizationService.GetResource("Admin.Common.UploadFile"));
+                    return RedirectToAction("GeneralCommon");
+                }
+
+               _uploadService.UploadIconsArchive(archivefile);
+
+                //activity log
+                _customerActivityService.InsertActivity("UploadIconsArchive", _localizationService.GetResource("ActivityLog.UploadNewIconsArchive"));
+
+                _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.FaviconAndAppIcons.Uploaded"));
+
+                //restart application
+                _webHelper.RestartAppDomain();
+            }
+            catch (Exception exc)
+            {
+                _notificationService.ErrorNotification(exc);
+            }
+
+            return RedirectToAction("GeneralCommon");
+        }
+
 
         public virtual IActionResult AllSettings()
         {

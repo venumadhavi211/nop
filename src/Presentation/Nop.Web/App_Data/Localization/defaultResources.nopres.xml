@@ -1122,6 +1122,9 @@
   <LocaleResource Name="ActivityLog.UninstallPlugin">
     <Value>Uninstalled a plugin (FriendlyName: '{0}')</Value>
   </LocaleResource>
+  <LocaleResource Name="ActivityLog.UploadNewIconsArchive">
+    <Value>Uploaded a new favicon and app icons archive</Value>
+  </LocaleResource>
   <LocaleResource Name="ActivityLog.UploadNewPlugin">
     <Value>Uploaded a new plugin (FriendlyName: '{0}')</Value>
   </LocaleResource>
@@ -4161,6 +4164,9 @@
   <LocaleResource Name="Admin.Common.ExportToXml.Selected">
     <Value>Export to XML (selected)</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Common.FaviconAndAppIcons.HeadCodeError">
+    <Value>Error loading head code. Check the correctness of the entered code and make sure that the tags are properly closed in accordance with the xml format.</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.Common.Go">
     <Value>Go</Value>
   </LocaleResource>
@@ -6276,6 +6282,9 @@
   <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.ZipPostalCodeRequired.Hint">
     <Value>Check if 'Zip / postal code' is required.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.FaviconAndAppIcons.Uploaded">
+    <Value>Favicon and app icons have been uploaded</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.Forums">
     <Value>Forum settings</Value>
   </LocaleResource>
@@ -6551,6 +6560,9 @@
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.Common">
     <Value>Common</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.FaviconAndAppIcons">
+    <Value>Favicon and app icons</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.FooterItems">
     <Value>Footer items</Value>
@@ -6881,6 +6893,18 @@
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FacebookLink.Hint">
     <Value>Specify your Facebook page URL. Leave empty if you have no such page.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.PageHeadCode">
+    <Value><![CDATA[Code for the <head> element]]></Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.PageHeadCode.Hint">
+    <Value><![CDATA[Enter the code for the document metadata element(<head>) with <link> and <meta> tags for favicon and app icons.If you use a special favicon generator it generates this code automatically and you can simply copy and paste it. Important! Do not forget to close the tags in accordance with the requirements of the xml standard.]]></Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.UploadIconsArchive">
+    <Value>Upload archive</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.UploadIconsArchive.Hint">
+    <Value>Upload archive which contains special pictures for favicon and app icons for different operating systems and devices.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.ForceSslForAllPages">
     <Value>Force SSL for all site pages</Value>

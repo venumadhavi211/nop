@@ -233,6 +233,30 @@ set @resources='
   <LocaleResource Name="Plugins.Payments.Square.Fields.Location.Select">
     <Value>Select location</Value>
   </LocaleResource>
+  <LocaleResource Name="ActivityLog.UploadNewIconsArchive">
+    <Value>Uploaded a new favicon and app icons archive</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Common.FaviconAndAppIcons.HeadCodeError">
+    <Value>Error loading head code. Check the correctness of the entered code and make sure that the tags are properly closed in accordance with the xml format.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.FaviconAndAppIcons.Uploaded">
+    <Value>Favicon and app icons have been uploaded</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.FaviconAndAppIcons">
+    <Value>Favicon and app icons</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.PageHeadCode">
+    <Value><![CDATA[Code for the <head> element]]></Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.PageHeadCode.Hint">
+    <Value><![CDATA[Enter the code for the document metadata element(<head>) with <link> and <meta> tags for favicon and app icons.If you use a special favicon generator it generates this code automatically and you can simply copy and paste it. Important! Do not forget to close the tags in accordance with the requirements of the xml standard.]]></Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.UploadIconsArchive">
+    <Value>Upload archive</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.FaviconAndAppIcons.UploadIconsArchive.Hint">
+    <Value>Upload archive which contains special pictures for favicon and app icons for different operating systems and devices.</Value>
+  </LocaleResource>
 </Language>
 '
 
@@ -1016,6 +1040,14 @@ IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [Name] = N'catalogsettings.exportim
 BEGIN
     INSERT [Setting] ([Name], [Value], [StoreId])
     VALUES (N'catalogsettings.exportimportproductuselimitedtostores', N'False', 0)
+END
+GO
+
+  --new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [Name] = N'commonsettings.faviconandappiconsheadcode')
+BEGIN
+    INSERT [Setting] ([Name], [Value], [StoreId])
+    VALUES (N'commonsettings.faviconandappiconsheadcode', N'<link rel="apple-touch-icon" sizes="57x57" href="/icons_1/apple-icon-57x57.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="60x60" href="/icons_1/apple-icon-60x60.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="72x72" href="/icons_1/apple-icon-72x72.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="76x76" href="/icons_1/apple-icon-76x76.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="114x114" href="/icons_1/apple-icon-114x114.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="120x120" href="/icons_1/apple-icon-120x120.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="144x144" href="/icons_1/apple-icon-144x144.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="152x152" href="/icons_1/apple-icon-152x152.png?f=zgdt1lq"></link><link rel="apple-touch-icon" sizes="180x180" href="/icons_1/apple-icon-180x180.png?f=zgdt1lq"></link><link rel="icon" type="image/png" sizes="192x192" href="/icons_1/android-icon-192x192.png?f=zgdt1lq"></link><link rel="icon" type="image/png" sizes="32x32" href="/icons_1/favicon-32x32.png?f=zgdt1lq"></link><link rel="icon" type="image/png" sizes="96x96" href="/icons_1/favicon-96x96.png?f=zgdt1lq"></link><link rel="icon" type="image/png" sizes="16x16" href="/icons_1/favicon-16x16.png?f=zgdt1lq"></link><link rel="manifest" href="/icons_1/manifest.json?f=zgdt1lq"></link><meta name="msapplication-TileColor" content="#ffffff"></meta><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"></meta><meta name="theme-color" content="#ffffff"></meta>', 0)
 END
 GO
 

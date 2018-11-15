@@ -13,6 +13,7 @@ namespace Nop.Web.Areas.Admin.Models.Settings
         {
             StoreInformationSettings = new StoreInformationSettingsModel();
             SeoSettings = new SeoSettingsModel();
+            FaviconAndAppIconSettings = new FaviconAndAppIconModel();
             SecuritySettings = new SecuritySettingsModel();
             CaptchaSettings = new CaptchaSettingsModel();
             PdfSettings = new PdfSettingsModel();
@@ -32,6 +33,8 @@ namespace Nop.Web.Areas.Admin.Models.Settings
         public StoreInformationSettingsModel StoreInformationSettings { get; set; }
 
         public SeoSettingsModel SeoSettings { get; set; }
+
+        public FaviconAndAppIconModel FaviconAndAppIconSettings { get; set; }
 
         public SecuritySettingsModel SecuritySettings { get; set; }
 

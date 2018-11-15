@@ -1,15 +1,16 @@
+using Nop.Core;
+using Nop.Core.Caching;
+using Nop.Core.Configuration;
+using Nop.Core.Data;
+using Nop.Core.Domain.Configuration;
+using Nop.Core.Infrastructure;
+using Nop.Services.Events;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Nop.Core;
-using Nop.Core.Caching;
-using Nop.Core.Configuration;
-using Nop.Core.Data;
-using Nop.Core.Domain.Configuration;
-using Nop.Services.Events;
 
 namespace Nop.Services.Configuration
 {
@@ -143,7 +144,7 @@ namespace Nop.Services.Configuration
                 InsertSetting(setting, clearCache);
             }
         }
-
+       
         #endregion
 
         #region Methods
