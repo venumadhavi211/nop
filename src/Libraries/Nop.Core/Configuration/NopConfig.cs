@@ -91,6 +91,8 @@ namespace Nop.Core.Configuration
         /// </summary>
         public bool UsePluginsShadowCopy { get; set; }
 
+        public bool UseOldPluginsManager { get; set; } = false;
+
         /// <summary>
         /// Gets or sets a value indicating whether to use backwards compatibility with SQL Server 2008 and SQL Server 2008R2
         /// </summary>

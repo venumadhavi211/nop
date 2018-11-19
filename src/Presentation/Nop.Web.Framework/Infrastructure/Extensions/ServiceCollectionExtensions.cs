@@ -68,6 +68,8 @@ namespace Nop.Web.Framework.Infrastructure.Extensions
                 EngineContext.Current.Resolve<ILogger>().Information("Application started", null, null);
             }
 
+            PluginManager.InstallPluginsIfNeed();
+
             return serviceProvider;
         }
 

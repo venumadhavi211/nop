@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
+using Nop.Core.Configuration;
 using Nop.Core.Domain.Cms;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Payments;
@@ -52,6 +53,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         private readonly ShippingSettings _shippingSettings;
         private readonly TaxSettings _taxSettings;
         private readonly WidgetSettings _widgetSettings;
+        private readonly NopConfig _nopConfig;
 
         #endregion
 
@@ -75,7 +77,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             PaymentSettings paymentSettings,
             ShippingSettings shippingSettings,
             TaxSettings taxSettings,
-            WidgetSettings widgetSettings)
+            WidgetSettings widgetSettings,
+            NopConfig nopConfig)
         {
             this._externalAuthenticationSettings = externalAuthenticationSettings;
             this._customerActivityService = customerActivityService;
@@ -96,6 +99,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             this._shippingSettings = shippingSettings;
             this._taxSettings = taxSettings;
             this._widgetSettings = widgetSettings;
+            this._nopConfig = nopConfig;
         }
 
         #endregion
@@ -230,17 +234,24 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (pluginDescriptor.Installed)
                     return RedirectToAction("List");
 
-                //install plugin
-                pluginDescriptor.Instance().Install();
+                if (!_nopConfig.UseOldPluginsManager)
+                {
+                    PluginManager.AddPluginToInstall(pluginDescriptor);
+                }
+                else
+                {
+                    //install plugin
+                    pluginDescriptor.Instance().Install();
 
-                //activity log
-                _customerActivityService.InsertActivity("InstallNewPlugin",
-                    string.Format(_localizationService.GetResource("ActivityLog.InstallNewPlugin"), pluginDescriptor.FriendlyName));
+                    //activity log
+                    _customerActivityService.InsertActivity("InstallNewPlugin",
+                        string.Format(_localizationService.GetResource("ActivityLog.InstallNewPlugin"), pluginDescriptor.FriendlyName));
 
-                _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Plugins.Installed"));
+                    _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Plugins.Installed"));
 
-                //restart application
-                _webHelper.RestartAppDomain();
+                    //restart application
+                    _webHelper.RestartAppDomain();
+                }
             }
             catch (Exception exc)
             {
@@ -274,17 +285,25 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (!pluginDescriptor.Installed)
                     return RedirectToAction("List");
 
-                //uninstall plugin
-                pluginDescriptor.Instance().Uninstall();
+                if (!_nopConfig.UseOldPluginsManager)
+                {
+                    PluginManager.AddPluginToUnInstall(pluginDescriptor);
+                }
+                else
+                {
+                    //uninstall plugin
+                    pluginDescriptor.Instance().Uninstall();
 
-                //activity log
-                _customerActivityService.InsertActivity("UninstallPlugin",
-                    string.Format(_localizationService.GetResource("ActivityLog.UninstallPlugin"), pluginDescriptor.FriendlyName));
+                    //activity log
+                    _customerActivityService.InsertActivity("UninstallPlugin",
+                        string.Format(_localizationService.GetResource("ActivityLog.UninstallPlugin"), pluginDescriptor.FriendlyName));
 
-                _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Plugins.Uninstalled"));
+                    _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Plugins.Uninstalled"));
 
-                //restart application
-                _webHelper.RestartAppDomain();
+                    //restart application
+                    _webHelper.RestartAppDomain();
+                }
+                
             }
             catch (Exception exc)
             {
@@ -310,17 +329,29 @@ namespace Nop.Web.Areas.Admin.Controllers
                         systemName = formValue.Substring("delete-plugin-link-".Length);
 
                 var pluginDescriptor = _pluginFinder.GetPluginDescriptorBySystemName(systemName, LoadPluginsMode.All);
-                if (!PluginManager.DeletePlugin(pluginDescriptor))
+
+                //check whether plugin is not installed
+                if (pluginDescriptor.Installed)
                     return RedirectToAction("List");
 
-                //activity log
-                _customerActivityService.InsertActivity("DeletePlugin",
-                    string.Format(_localizationService.GetResource("ActivityLog.DeletePlugin"), pluginDescriptor.FriendlyName));
+                if (!_nopConfig.UseOldPluginsManager)
+                {
+                    PluginManager.AddPluginToDelete(pluginDescriptor);
+                }
+                else
+                {
+                    if (!PluginManager.DeletePlugin(pluginDescriptor))
+                        return RedirectToAction("List");
 
-                _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Plugins.Deleted"));
+                    //activity log
+                    _customerActivityService.InsertActivity("DeletePlugin",
+                        string.Format(_localizationService.GetResource("ActivityLog.DeletePlugin"), pluginDescriptor.FriendlyName));
 
-                //restart application
-                _webHelper.RestartAppDomain();
+                    _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Configuration.Plugins.Deleted"));
+
+                    //restart application
+                    _webHelper.RestartAppDomain();
+                }
             }
             catch (Exception exc)
             {
@@ -336,6 +367,8 @@ namespace Nop.Web.Areas.Admin.Controllers
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManagePlugins))
                 return AccessDeniedView();
+
+            PluginManager.UninstallAndDeletePluginsIfNeed();
 
             //restart application
             _webHelper.RestartAppDomain();

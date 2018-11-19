@@ -153,6 +153,8 @@ namespace Nop.Web.Areas.Admin.Factories
             //prepare page parameters
             searchModel.SetGridPageSize();
 
+            searchModel.NeedToRestart = PluginManager.NeedToRestart;
+
             return searchModel;
         }
 
