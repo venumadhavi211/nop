@@ -14,6 +14,13 @@
     {
         <div class="section select-billing-address">
             <label for="billing-address-select">@T("Checkout.SelectBillingAddressOrEnterNewOne")</label>
+            <label class="min-amount-warning">
+                @T("Checkout.Addresses.Invalid")
+                @foreach (var address in Model.InvalidExistingAddresses)
+                {
+                    <strong>@address.FirstName @address.LastName</strong>
+                }
+            </label>
             <div>
                 <select name="billing_address_id" id="billing-address-select" class="address-select"
                         title="" onchange="Billing.newAddress(!this.value)">
